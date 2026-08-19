@@ -6,24 +6,33 @@ import SelectMonth from './pages/SelectMonth';
 import Calendar from './pages/Calendar';
 import Profile from './pages/Profile';
 import Holidays from './pages/Holidays';
+import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { CalendarProvider } from './context/CalendarContext';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Auth routes without Layout */}
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        
-        {/* App routes with Layout */}
-        <Route element={<Layout />}>
-          <Route path="/select-month" element={<SelectMonth />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/holidays" element={<Holidays />} />
-        </Route>
-      </Routes>
-    </Router>
+    <ThemeProvider>
+      <AuthProvider>
+        <CalendarProvider>
+          <Router>
+            <Routes>
+              {/* Auth routes without Layout */}
+              <Route path="/" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              
+              {/* App routes with Layout */}
+              <Route element={<Layout />}>
+                <Route path="/select-month" element={<SelectMonth />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/holidays" element={<Holidays />} />
+              </Route>
+            </Routes>
+          </Router>
+        </CalendarProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

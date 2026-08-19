@@ -1,7 +1,16 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
-body { font-family: 'Lilita One', cursive; }
+body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.font-brand {
+    font-family: 'Lilita One', cursive;
+}
 .bg-pattern {
     background-image: radial-gradient(circle at 20px 20px, rgba(254, 225, 127, 0.05) 2px, transparent 0);
     background-size: 40px 40px;
@@ -13,4 +22,45 @@ body { font-family: 'Lilita One', cursive; }
     0% { transform: translateY(0px) rotate(0deg); }
     50% { transform: translateY(-20px) rotate(5deg); }
     100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* Custom Scrollbar Styles with Dark Mode Support */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+
+.dark ::-webkit-scrollbar-thumb,
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover,
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.45);
+}
+
+/* Standard Firefox scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }

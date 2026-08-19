@@ -1,88 +1,135 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import mariposaAmarilla from '../assets/mariposa-amarilla.png';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    
+    const { error } = await signIn(email, password);
+    
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      navigate('/calendar');
+    }
+  };
+
   return (
-    <div className="bg-[#001233] text-white h-[100dvh] flex items-center justify-center relative overflow-hidden w-full">
-      {/* Decorative Butterflies could go here if implemented as components */}
-      <main className="w-full max-w-md p-[16px] z-10 relative">
-        <div className="bg-[#00113a]/80 backdrop-blur-md rounded-xl border-4 border-[#e1c566] p-6 sm:p-8 shadow-2xl relative overflow-hidden max-h-[95vh] overflow-y-auto no-scrollbar">
-          {/* Subtle internal decoration */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#fee17f]/10 rounded-full blur-2xl"></div>
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#CE1126]/10 rounded-full blur-3xl"></div>
+    <div className="bg-surface h-[100dvh] w-full flex overflow-hidden">
+      {/* Decorative Left Panel (Desktop Only) */}
+      <div className="hidden lg:flex lg:w-1/2 bg-secondary-container relative flex-col justify-center items-center p-12 overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 30%, #e1c566 0%, transparent 50%), radial-gradient(circle at 80% 80%, #002465 0%, transparent 50%)' }}></div>
+        <img 
+          alt="Colomdario" 
+          className="w-64 h-64 object-contain relative z-10 drop-shadow-2xl animate-pulse-slow" 
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7qgzlDkApyJaoz-n6XBNEBbRy0FPQw3DXAE2vL9tCJfmDtxLGUKXBLMv3uO4bESD_hesLdQqsvQNt-M-pAITxfyHmNje5YwuDYlpap8pCXsrxIPLWWR3x7XmayPDl_pxpV0umdb94VwVJOjsdIYE51TfjmjMpBqcIsYxIc2oXFTfFbugeu9mFk-JKH1y6T9DoeN6fYlhr7mOh9mdYXyW4JMLWbVk66W6tueQ3K2V3nSwlbJn_1rfIg7_FokTXZmGaLA" 
+        />
+        <h1 className="text-[64px] font-display-lg font-bold text-on-secondary-container mt-8 relative z-10 text-center leading-none">Colomdario</h1>
+        <p className="text-[24px] font-headline-sm text-on-secondary-container mt-4 relative z-10 text-center opacity-80">Tu calendario, a lo colombiano.</p>
+        
+        {/* Floating yellow butterflies */}
+        <img alt="" className="absolute top-20 right-20 w-16 opacity-40 rotate-12" src={mariposaAmarilla} />
+        <img alt="" className="absolute bottom-32 left-16 w-24 opacity-40 -rotate-12" src={mariposaAmarilla} />
+      </div>
+
+      {/* Right Panel (Form) */}
+      <main className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
+        <div className="w-full max-w-sm flex flex-col justify-center">
           
-          <div className="text-center mb-[32px] relative z-10">
+          {/* Mobile Header */}
+          <div className="lg:hidden text-center mb-8">
             <img 
-              alt="Logo Colomdario Mariposa" 
-              className="w-24 h-24 mx-auto mb-[8px] object-contain drop-shadow-md" 
+              alt="Logo" 
+              className="w-16 h-16 mx-auto mb-2 object-contain" 
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7qgzlDkApyJaoz-n6XBNEBbRy0FPQw3DXAE2vL9tCJfmDtxLGUKXBLMv3uO4bESD_hesLdQqsvQNt-M-pAITxfyHmNje5YwuDYlpap8pCXsrxIPLWWR3x7XmayPDl_pxpV0umdb94VwVJOjsdIYE51TfjmjMpBqcIsYxIc2oXFTfFbugeu9mFk-JKH1y6T9DoeN6fYlhr7mOh9mdYXyW4JMLWbVk66W6tueQ3K2V3nSwlbJn_1rfIg7_FokTXZmGaLA" 
             />
-            <h1 className="text-[48px] leading-[56px] font-bold text-[#fee17f] tracking-tight">COLOMDARIO</h1>
-            <p className="text-[16px] text-[#b3c5ff] mt-2">Tu calendario, a lo colombiano.</p>
+            <h1 className="text-[32px] font-display-lg font-bold text-secondary leading-tight">Colomdario</h1>
+          </div>
+
+          <div className="text-center lg:text-left mb-8">
+            <h2 className="text-[28px] font-headline-md font-bold text-on-surface">Bienvenido de nuevo</h2>
+            <p className="text-[14px] text-on-surface-variant mt-1">Ingresa tus datos para continuar.</p>
           </div>
           
-          <form className="space-y-[16px] relative z-10">
+          {error && (
+            <div className="mb-4 p-3 bg-error-container text-on-error-container rounded-lg text-[14px]">
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-4" onSubmit={handleLogin}>
             <div>
-              <label className="block text-[14px] text-[#b3c5ff] mb-2 ml-1" htmlFor="email">Correo Electrónico</label>
+              <label className="block text-[12px] font-semibold text-on-surface uppercase tracking-wider mb-1.5" htmlFor="email">Correo Electrónico</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-[#e1c566]/70">mail</span>
-                </div>
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-[20px]">mail</span>
                 <input 
-                  className="block w-full pl-10 pr-3 py-3 bg-[#435c9e]/20 border-2 border-[#e1c566]/50 rounded-lg text-white placeholder-[#b3c5ff]/50 focus:outline-none focus:ring-2 focus:ring-[#fee17f] focus:border-[#fee17f] transition-colors text-[16px]" 
+                  className="w-full pl-10 pr-4 py-2.5 bg-surface-bright border-2 border-border-muted rounded-lg text-on-surface placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors text-[14px]" 
                   id="email" 
                   name="email" 
                   placeholder="tu@correo.com.co" 
                   required 
                   type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>
             
             <div>
-              <label className="block text-[14px] text-[#b3c5ff] mb-2 ml-1" htmlFor="password">Contraseña</label>
+              <label className="block text-[12px] font-semibold text-on-surface uppercase tracking-wider mb-1.5" htmlFor="password">Contraseña</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-[#e1c566]/70">lock</span>
-                </div>
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-[20px]">lock</span>
                 <input 
-                  className="block w-full pl-10 pr-3 py-3 bg-[#435c9e]/20 border-2 border-[#e1c566]/50 rounded-lg text-white placeholder-[#b3c5ff]/50 focus:outline-none focus:ring-2 focus:ring-[#fee17f] focus:border-[#fee17f] transition-colors text-[16px]" 
+                  className="w-full pl-10 pr-4 py-2.5 bg-surface-bright border-2 border-border-muted rounded-lg text-on-surface placeholder:text-outline-variant focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors text-[14px]" 
                   id="password" 
                   name="password" 
                   placeholder="••••••••" 
                   required 
                   type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
             </div>
             
-            <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center">
+            <div className="flex items-center justify-between pt-1 pb-4">
+              <div className="flex items-center gap-2">
                 <input 
-                  className="h-5 w-5 rounded border-2 border-[#e1c566] text-[#fee17f] focus:ring-[#fee17f] bg-[#435c9e]/20" 
+                  className="w-4 h-4 rounded border-2 border-border-muted text-secondary focus:ring-secondary bg-surface-bright" 
                   id="remember-me" 
                   name="remember-me" 
                   type="checkbox" 
                 />
-                <label className="ml-2 block text-[14px] text-[#b3c5ff]" htmlFor="remember-me">
+                <label className="text-[12px] text-on-surface-variant" htmlFor="remember-me">
                   Recordarme
                 </label>
               </div>
-              <div className="text-sm">
-                <a className="text-[14px] text-[#fee17f] hover:text-[#e1c566] transition-colors underline decoration-2 underline-offset-2" href="#">¿Olvidaste tu contraseña?</a>
-              </div>
+              <a className="text-[12px] font-semibold text-secondary hover:underline transition-all" href="#">¿Olvidaste tu contraseña?</a>
             </div>
             
-            <div className="pt-[8px]">
-              <Link to="/select-month" className="w-full flex justify-center py-4 px-4 border-2 border-transparent rounded-lg shadow-sm text-[20px] font-semibold text-[#231b00] bg-[#fee17f] hover:bg-[#e1c566] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#001233] focus:ring-[#fee17f] transition-all active:scale-95 border-b-4 border-b-[#564500]">
-                Entrar a Colomdario
-              </Link>
-            </div>
+            <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 py-3 px-4 border-2 border-secondary rounded-lg shadow-sm text-[16px] font-semibold text-on-secondary-container bg-secondary-container hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50">
+              <span>{loading ? 'Entrando...' : 'Entrar'}</span>
+              <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+            </button>
           </form>
           
-          <div className="mt-[32px] text-center relative z-10">
-            <p className="text-[14px] text-[#b3c5ff]">
+          <div className="mt-8 text-center">
+            <p className="text-[14px] text-on-surface-variant">
               ¿No tienes cuenta aún?
-              <Link to="/register" className="text-[20px] font-semibold text-[#fee17f] hover:text-[#e1c566] transition-colors ml-1 underline decoration-2 underline-offset-2">Crear cuenta</Link>
+              <Link to="/register" className="font-semibold text-secondary hover:underline transition-all ml-1">Crear cuenta</Link>
             </p>
           </div>
         </div>

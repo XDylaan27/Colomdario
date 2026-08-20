@@ -30,6 +30,13 @@ export const AuthProvider = ({ children }) => {
     user,
     signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
     signUp: (email, password) => supabase.auth.signUp({ email, password }),
+    signInWithGoogle: () =>
+      supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/calendar`,
+        },
+      }),
     signOut: () => supabase.auth.signOut(),
   };
 

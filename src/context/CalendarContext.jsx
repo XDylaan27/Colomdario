@@ -20,11 +20,21 @@ export function CalendarProvider({ children }) {
   const [isYearModalOpen, setIsYearModalOpen] = useState(false);
   const [isMultiSelect, setIsMultiSelect] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
-  const [activeMonth, setActiveMonth] = useState(currentRealMonth);
+
+  const [activeMonth, setActiveMonthState] = useState(() => {
+    const saved = localStorage.getItem('colomdario_active_month');
+    const parsed = saved !== null ? parseInt(saved, 10) : NaN;
+    return !isNaN(parsed) && parsed >= 0 && parsed <= 11 ? parsed : currentRealMonth;
+  });
 
   const setSelectedYear = (year) => {
     setSelectedYearState(year);
     localStorage.setItem('colomdario_year', String(year));
+  };
+
+  const setActiveMonth = (m) => {
+    setActiveMonthState(m);
+    localStorage.setItem('colomdario_active_month', String(m));
   };
 
   return (

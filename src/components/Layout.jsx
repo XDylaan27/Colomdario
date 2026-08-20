@@ -13,11 +13,13 @@ export default function Layout() {
   const {
     selectedYear,
     setSelectedYear,
+    isYearModalOpen,
     setIsYearModalOpen,
     isMultiSelect,
     setIsMultiSelect,
     setIsNoteModalOpen,
     activeMonth,
+    setActiveMonth,
     monthNames
   } = useCalendarContext();
 
@@ -31,7 +33,9 @@ export default function Layout() {
   const handleLogoClick = (e) => {
     e.preventDefault();
     const realYear = currentRealDate.getFullYear();
+    const realMonth = currentRealDate.getMonth();
     setSelectedYear(realYear);
+    setActiveMonth(realMonth);
     navigate(`/calendar?year=${realYear}&month=${currentMonthNum}&day=${currentDayNum}`);
   };
 
@@ -42,7 +46,8 @@ export default function Layout() {
       return;
     }
     if (!isCalendar) {
-      navigate(`/calendar?month=${currentMonthNum}&day=${currentDayNum}`);
+      const activeMonthNum = String(activeMonth + 1).padStart(2, '0');
+      navigate(`/calendar?month=${activeMonthNum}`);
     }
     setIsNoteModalOpen(true);
   };
@@ -50,7 +55,8 @@ export default function Layout() {
   // Click on "Selección Múltiple" in header
   const handleToggleMultiSelect = () => {
     if (!isCalendar) {
-      navigate(`/calendar?month=${currentMonthNum}`);
+      const activeMonthNum = String(activeMonth + 1).padStart(2, '0');
+      navigate(`/calendar?month=${activeMonthNum}`);
     }
     setIsMultiSelect(prev => !prev);
   };
@@ -93,10 +99,24 @@ export default function Layout() {
             <button
               type="button"
               onClick={() => setIsYearModalOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-secondary/15 dark:bg-secondary-fixed/20 hover:bg-secondary/25 text-secondary dark:text-secondary-fixed font-bold text-[14px] md:text-[15px] border border-secondary/30 transition-all hover:scale-105 shadow-xs cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-secondary/15 dark:bg-secondary-fixed/20 hover:bg-secondary/25 text-secondary dark:text-secondary-fixed font-bold text-[14px] md:text-[15px] border border-secondary/30 transition-all hover:scale-105 shadow-xs cursor-pointer overflow-hidden"
               title="Cambiar año"
             >
-              <span>{selectedYear}</span>
+              <motion.span
+                key={selectedYear}
+                initial={{ scale: 0.8 }}
+                animate={{
+                  scale: [1, 1.35, 0.9, 1.15, 1],
+                }}
+                transition={{
+                  duration: 0.6,
+                  times: [0, 0.25, 0.5, 0.75, 1],
+                  ease: "easeInOut"
+                }}
+                className="inline-block"
+              >
+                {selectedYear}
+              </motion.span>
               <span className="material-symbols-outlined text-[18px]">expand_more</span>
             </button>
           )}
@@ -112,8 +132,16 @@ export default function Layout() {
                 <button
                   type="button"
                   onClick={() => {
-                    const prevMonth = activeMonth === 0 ? 11 : activeMonth - 1;
-                    navigate(`/calendar?month=${String(prevMonth + 1).padStart(2, '0')}`);
+                    if (activeMonth === 0) {
+                      const newYear = selectedYear - 1;
+                      setSelectedYear(newYear);
+                      setActiveMonth(11);
+                      navigate(`/calendar?year=${newYear}&month=12`);
+                    } else {
+                      const prevMonth = activeMonth - 1;
+                      setActiveMonth(prevMonth);
+                      navigate(`/calendar?month=${String(prevMonth + 1).padStart(2, '0')}`);
+                    }
                   }}
                   aria-label="Mes anterior"
                   className="p-1 md:p-1.5 rounded-lg hover:bg-secondary/15 text-secondary dark:text-secondary-fixed transition-colors flex items-center justify-center cursor-pointer"
@@ -133,8 +161,16 @@ export default function Layout() {
                 <button
                   type="button"
                   onClick={() => {
-                    const nextMonth = activeMonth === 11 ? 0 : activeMonth + 1;
-                    navigate(`/calendar?month=${String(nextMonth + 1).padStart(2, '0')}`);
+                    if (activeMonth === 11) {
+                      const newYear = selectedYear + 1;
+                      setSelectedYear(newYear);
+                      setActiveMonth(0);
+                      navigate(`/calendar?year=${newYear}&month=01`);
+                    } else {
+                      const nextMonth = activeMonth + 1;
+                      setActiveMonth(nextMonth);
+                      navigate(`/calendar?month=${String(nextMonth + 1).padStart(2, '0')}`);
+                    }
                   }}
                   aria-label="Mes siguiente"
                   className="p-1 md:p-1.5 rounded-lg hover:bg-secondary/15 text-secondary dark:text-secondary-fixed transition-colors flex items-center justify-center cursor-pointer"

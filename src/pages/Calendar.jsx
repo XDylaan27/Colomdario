@@ -1,5 +1,6 @@
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getColombianHolidays } from '../utils/holidays';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -27,6 +28,7 @@ export default function Calendar() {
     setIsMultiSelect,
     isNoteModalOpen,
     setIsNoteModalOpen,
+    activeMonth,
     setActiveMonth,
     monthNames
   } = useCalendarContext();
@@ -36,9 +38,9 @@ export default function Calendar() {
   const yearParam = searchParams.get('year');
   const dayParam = searchParams.get('day');
   
-  // Default to CURRENT REAL MONTH when entering calendar
-  const initialMonth = monthParam ? parseInt(monthParam, 10) - 1 : todayReal.getMonth();
-  const month = (initialMonth >= 0 && initialMonth <= 11) ? initialMonth : todayReal.getMonth();
+  // Default to active/persisted month when entering calendar
+  const initialMonth = monthParam ? parseInt(monthParam, 10) - 1 : activeMonth;
+  const month = (initialMonth >= 0 && initialMonth <= 11) ? initialMonth : activeMonth;
 
   // Sync year if specified in URL
   useEffect(() => {
@@ -142,13 +144,27 @@ export default function Calendar() {
   }, [dayParam, month, selectedYear]);
 
   const handleNext = () => {
-    const next = month === 11 ? 1 : month + 2;
-    setSearchParams({ month: next.toString().padStart(2, '0') });
+    if (month === 11) {
+      const newYear = selectedYear + 1;
+      setSelectedYear(newYear);
+      setActiveMonth(0);
+      setSearchParams({ year: newYear.toString(), month: '01' });
+    } else {
+      const next = month + 2;
+      setSearchParams({ month: next.toString().padStart(2, '0') });
+    }
   };
 
   const handlePrev = () => {
-    const prev = month === 0 ? 12 : month;
-    setSearchParams({ month: prev.toString().padStart(2, '0') });
+    if (month === 0) {
+      const newYear = selectedYear - 1;
+      setSelectedYear(newYear);
+      setActiveMonth(11);
+      setSearchParams({ year: newYear.toString(), month: '12' });
+    } else {
+      const prev = month;
+      setSearchParams({ month: prev.toString().padStart(2, '0') });
+    }
   };
 
   // Click on a day = select it (show its notes in sidebar). NOT create a note.
@@ -287,9 +303,28 @@ export default function Calendar() {
               <h2 className="font-display-lg text-[26px] md:text-[34px] font-bold text-secondary dark:text-secondary-fixed leading-tight tracking-tight">
                 {monthNames[month]}
               </h2>
-              <span className="px-3 py-0.5 rounded-full bg-secondary/15 dark:bg-secondary-fixed/20 text-secondary dark:text-secondary-fixed font-bold text-[13px] md:text-[15px] border border-secondary/30">
+              <motion.span
+                key={selectedYear}
+                initial={{ scale: 0.8, opacity: 0.8 }}
+                animate={{
+                  scale: [1, 1.45, 0.88, 1.22, 0.96, 1],
+                  opacity: 1,
+                  boxShadow: [
+                    '0 0 0 0 rgba(234, 179, 8, 0)',
+                    '0 0 0 8px rgba(234, 179, 8, 0.4)',
+                    '0 0 0 3px rgba(234, 179, 8, 0.2)',
+                    '0 0 0 0 rgba(234, 179, 8, 0)'
+                  ]
+                }}
+                transition={{
+                  duration: 0.7,
+                  times: [0, 0.25, 0.45, 0.7, 0.85, 1],
+                  ease: "easeInOut"
+                }}
+                className="px-3 py-0.5 rounded-full bg-secondary/15 dark:bg-secondary-fixed/20 text-secondary dark:text-secondary-fixed font-bold text-[13px] md:text-[15px] border border-secondary/30 inline-flex items-center justify-center select-none"
+              >
                 {selectedYear}
-              </span>
+              </motion.span>
             </div>
             
             {monthHolidays.length > 0 && (

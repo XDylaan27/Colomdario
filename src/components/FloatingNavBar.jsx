@@ -1,18 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, useAnimationControls, AnimatePresence } from 'framer-motion';
+import { useCalendarContext } from '../context/CalendarContext';
 
 export default function FloatingNavBar() {
   const location = useLocation();
   const navigate = useNavigate();
   const controls = useAnimationControls();
+  const { activeMonth } = useCalendarContext();
 
-  const currentRealDate = new Date();
-  const currentMonthNum = String(currentRealDate.getMonth() + 1).padStart(2, '0');
+  const activeMonthStr = String(activeMonth + 1).padStart(2, '0');
 
   const navItems = [
     { path: '/select-month', icon: 'today', label: 'Meses', basePath: '/select-month' },
-    { path: `/calendar?month=${currentMonthNum}`, icon: 'calendar_month', label: 'Calendario', basePath: '/calendar' },
+    { path: `/calendar?month=${activeMonthStr}`, icon: 'calendar_month', label: 'Calendario', basePath: '/calendar' },
     { path: '/holidays', icon: 'celebration', label: 'Festivos', basePath: '/holidays' },
   ];
 

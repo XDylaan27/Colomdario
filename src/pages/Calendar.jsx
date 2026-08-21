@@ -24,6 +24,8 @@ export default function Calendar() {
   const {
     selectedYear,
     setSelectedYear,
+    isYearModalOpen,
+    setIsYearModalOpen,
     isMultiSelect,
     setIsMultiSelect,
     isNoteModalOpen,
@@ -41,6 +43,32 @@ export default function Calendar() {
   // Default to active/persisted month when entering calendar
   const initialMonth = monthParam ? parseInt(monthParam, 10) - 1 : activeMonth;
   const month = (initialMonth >= 0 && initialMonth <= 11) ? initialMonth : activeMonth;
+
+  const handlePrevMonth = () => {
+    if (month === 0) {
+      const newYear = selectedYear - 1;
+      setSelectedYear(newYear);
+      setActiveMonth(11);
+      navigate(`/calendar?year=${newYear}&month=12`);
+    } else {
+      const prevMonth = month - 1;
+      setActiveMonth(prevMonth);
+      navigate(`/calendar?year=${selectedYear}&month=${String(prevMonth + 1).padStart(2, '0')}`);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (month === 11) {
+      const newYear = selectedYear + 1;
+      setSelectedYear(newYear);
+      setActiveMonth(0);
+      navigate(`/calendar?year=${newYear}&month=01`);
+    } else {
+      const nextMonth = month + 1;
+      setActiveMonth(nextMonth);
+      navigate(`/calendar?year=${selectedYear}&month=${String(nextMonth + 1).padStart(2, '0')}`);
+    }
+  };
 
   // Sync year if specified in URL
   useEffect(() => {
@@ -268,7 +296,7 @@ export default function Calendar() {
   };
 
   return (
-    <div className="flex flex-col relative h-[calc(100vh-76px)] overflow-hidden">
+    <div className="flex flex-col relative w-full lg:h-[calc(100vh-76px)] lg:overflow-hidden">
       <NoteModal 
         isOpen={isNoteModalOpen} 
         onClose={() => setIsNoteModalOpen(false)} 
@@ -294,44 +322,75 @@ export default function Calendar() {
 
 
       {/* Main Layout */}
-      <main className="flex-1 max-w-7xl mx-auto w-full flex flex-col lg:flex-row gap-8 p-[16px] md:p-[32px] items-stretch relative z-10 overflow-hidden min-h-0">
-        <section aria-label="Cuadrícula del calendario" className="flex-1 relative w-full h-full overflow-y-auto pr-2 pb-24 min-h-0">
+      <main className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-5 lg:gap-8 p-3 sm:p-4 md:p-6 lg:p-8 items-stretch relative z-10 lg:overflow-hidden lg:h-full pb-2 lg:pb-0 flex-1 min-h-0">
+        <section aria-label="Cuadrícula del calendario" className="w-full flex-1 relative lg:h-full lg:overflow-y-auto pr-0 lg:pr-2 pb-2 lg:pb-24 min-h-0">
           
-          {/* Month Header Banner */}
+          {/* Month Header Banner with Navigation & Year Selector */}
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-border-muted/60 dark:border-outline/40">
-            <div className="flex items-center gap-3">
-              <h2 className="font-display-lg text-[26px] md:text-[34px] font-bold text-secondary dark:text-secondary-fixed leading-tight tracking-tight">
-                {monthNames[month]}
-              </h2>
-              <motion.span
-                key={selectedYear}
-                initial={{ scale: 0.8, opacity: 0.8 }}
-                animate={{
-                  scale: [1, 1.45, 0.88, 1.22, 0.96, 1],
-                  opacity: 1,
-                  boxShadow: [
-                    '0 0 0 0 rgba(234, 179, 8, 0)',
-                    '0 0 0 8px rgba(234, 179, 8, 0.4)',
-                    '0 0 0 3px rgba(234, 179, 8, 0.2)',
-                    '0 0 0 0 rgba(234, 179, 8, 0)'
-                  ]
-                }}
-                transition={{
-                  duration: 0.7,
-                  times: [0, 0.25, 0.45, 0.7, 0.85, 1],
-                  ease: "easeInOut"
-                }}
-                className="px-3 py-0.5 rounded-full bg-secondary/15 dark:bg-secondary-fixed/20 text-secondary dark:text-secondary-fixed font-bold text-[13px] md:text-[15px] border border-secondary/30 inline-flex items-center justify-center select-none"
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Prev Month Button */}
+              <button
+                type="button"
+                onClick={handlePrevMonth}
+                aria-label="Mes anterior"
+                className="p-1 sm:p-1.5 rounded-lg bg-surface-bright dark:bg-inverse-surface hover:bg-secondary/20 dark:hover:bg-secondary-fixed/20 border border-border-muted dark:border-outline text-secondary dark:text-secondary-fixed transition-all active:scale-95 flex items-center justify-center cursor-pointer shadow-xs"
+                title="Mes anterior"
               >
-                {selectedYear}
-              </motion.span>
+                <span className="material-symbols-outlined text-[20px] md:text-[24px]">chevron_left</span>
+              </button>
+
+              {/* Month Name Link to Select Month with Stable Fixed Width */}
+              <Link
+                to="/select-month"
+                className="w-36 sm:w-44 md:w-52 text-center font-display-lg text-[24px] sm:text-[28px] md:text-[34px] font-bold text-secondary dark:text-secondary-fixed leading-tight tracking-tight hover:opacity-80 transition-opacity truncate inline-block"
+                title="Ver todos los meses"
+              >
+                {monthNames[month]}
+              </Link>
+
+              {/* Next Month Button */}
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                aria-label="Mes siguiente"
+                className="p-1 sm:p-1.5 rounded-lg bg-surface-bright dark:bg-inverse-surface hover:bg-secondary/20 dark:hover:bg-secondary-fixed/20 border border-border-muted dark:border-outline text-secondary dark:text-secondary-fixed transition-all active:scale-95 flex items-center justify-center cursor-pointer shadow-xs"
+                title="Mes siguiente"
+              >
+                <span className="material-symbols-outlined text-[20px] md:text-[24px]">chevron_right</span>
+              </button>
+
+              {/* Clickable Year Selector Button with Bounce Animation */}
+              <button
+                type="button"
+                onClick={() => setIsYearModalOpen(true)}
+                className="group relative cursor-pointer ml-1"
+                title="Cambiar año"
+              >
+                <motion.span
+                  key={selectedYear}
+                  initial={{ scale: 0.8, opacity: 0.8 }}
+                  animate={{
+                    scale: [1, 1.45, 0.88, 1.22, 0.96, 1],
+                    opacity: 1,
+                    boxShadow: [
+                      '0 0 0 0 rgba(234, 179, 8, 0)',
+                      '0 0 0 8px rgba(234, 179, 8, 0.4)',
+                      '0 0 0 3px rgba(234, 179, 8, 0.2)',
+                      '0 0 0 0 rgba(234, 179, 8, 0)'
+                    ]
+                  }}
+                  transition={{
+                    duration: 0.7,
+                    times: [0, 0.25, 0.45, 0.7, 0.85, 1],
+                    ease: "easeInOut"
+                  }}
+                  className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-secondary/15 dark:bg-secondary-fixed/20 group-hover:bg-secondary/25 dark:group-hover:bg-secondary-fixed/30 text-secondary dark:text-secondary-fixed font-bold text-[13px] md:text-[15px] border border-secondary/30 inline-flex items-center gap-1 select-none transition-all shadow-xs"
+                >
+                  <span>{selectedYear}</span>
+                  <span className="material-symbols-outlined text-[16px] group-hover:translate-y-0.5 transition-transform">expand_more</span>
+                </motion.span>
+              </button>
             </div>
-            
-            {monthHolidays.length > 0 && (
-              <span className="text-[12px] md:text-[13px] px-3 py-1 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30">
-                {monthHolidays.length} {monthHolidays.length === 1 ? 'festivo' : 'festivos'}
-              </span>
-            )}
           </div>
 
           {/* Days of Week Header */}
@@ -401,106 +460,128 @@ export default function Calendar() {
         </section>
 
         {/* Sidebar Section */}
-        <aside aria-label="Barra lateral de utilidades" className="w-full lg:w-80 flex-shrink-0 flex flex-col gap-3 max-h-full min-h-0 overflow-hidden">
+        <aside aria-label="Barra lateral de utilidades" className="w-full lg:w-80 flex-shrink-0 flex flex-col gap-4 lg:gap-3 lg:max-h-full min-h-0 lg:overflow-hidden pb-4 lg:pb-0">
           
-          {/* Notes Panel (collapsible) */}
+          {/* Notes Panel (collapsible with animation) */}
           {!isMultiSelect && selectedDates.length === 1 && (
-            <section className={`bg-surface-container-lowest dark:bg-primary-container border-2 border-primary dark:border-primary-fixed rounded-xl shadow-sm overflow-hidden flex flex-col ${sidebarPanel === 'notes' ? 'flex-1 min-h-0' : 'flex-shrink-0'}`}>
+            <section className={`bg-surface-container-lowest dark:bg-primary-container border-2 border-primary dark:border-primary-fixed rounded-xl shadow-sm overflow-hidden flex flex-col transition-all duration-300 ${sidebarPanel === 'notes' ? 'flex-1 min-h-0' : 'flex-shrink-0'}`}>
               <button 
                 onClick={() => setSidebarPanel(sidebarPanel === 'notes' ? '' : 'notes')}
-                className="w-full flex-shrink-0 flex items-center justify-between p-3.5 hover:bg-surface-bright/50 dark:hover:bg-inverse-surface/10 transition-colors"
+                className="w-full flex-shrink-0 flex items-center justify-between p-3.5 hover:bg-surface-bright/50 dark:hover:bg-inverse-surface/10 transition-colors cursor-pointer"
               >
                 <h3 className="text-[16px] font-semibold text-on-surface dark:text-inverse-on-surface">
                   Notas del {selectedDates[0].day} de {monthNames[month]}
                 </h3>
-                <svg className={`w-5 h-5 text-on-surface-variant transition-transform duration-200 ${sidebarPanel === 'notes' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
+                <svg className={`w-5 h-5 text-on-surface-variant transition-transform duration-300 ${sidebarPanel === 'notes' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
               </button>
 
-              {sidebarPanel === 'notes' && (
-                <div className="px-3.5 pb-3.5 flex-1 min-h-0 flex flex-col overflow-hidden">
-                  {selectedDayNotes.length > 0 ? (
-                    <div className="flex-1 min-h-0 flex flex-col overflow-hidden space-y-2.5">
-                      <ul className="space-y-2 max-h-[170px] md:max-h-[210px] flex-1 min-h-0 overflow-y-auto pr-1">
-                        {selectedDayNotes.map(note => (
-                          <li key={note.id} 
-                              onClick={() => setViewingNote(note)}
-                              className="bg-surface-bright dark:bg-inverse-surface rounded-lg border border-border-muted dark:border-outline p-2.5 cursor-pointer hover:border-secondary dark:hover:border-secondary-fixed transition-colors">
-                            <p className="text-[13px] text-on-surface dark:text-inverse-on-surface line-clamp-2 leading-snug">{note.content}</p>
-                          </li>
-                        ))}
-                      </ul>
-                      <button
-                        type="button"
-                        onClick={handleNuevaNota}
-                        className="w-full py-1.5 px-3 rounded-lg border border-dashed border-secondary dark:border-secondary-fixed text-secondary dark:text-secondary-fixed hover:bg-secondary/10 dark:hover:bg-secondary-fixed/10 font-semibold text-[12px] flex items-center justify-center gap-1 transition-colors cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">add</span>
-                        <span>Agregar otra nota</span>
-                      </button>
+              <AnimatePresence initial={false}>
+                {sidebarPanel === 'notes' && (
+                  <motion.div
+                    key="notes-content"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.28, ease: [0.04, 0.62, 0.23, 0.98] }}
+                    className="overflow-hidden flex-1 min-h-0 flex flex-col"
+                  >
+                    <div className="px-3.5 pb-3.5 flex-1 min-h-0 flex flex-col overflow-hidden">
+                      {selectedDayNotes.length > 0 ? (
+                        <div className="flex-1 min-h-0 flex flex-col overflow-hidden space-y-2.5">
+                          <ul className="space-y-2 max-h-[170px] md:max-h-[210px] flex-1 min-h-0 overflow-y-auto pr-1">
+                            {selectedDayNotes.map(note => (
+                              <li key={note.id} 
+                                  onClick={() => setViewingNote(note)}
+                                  className="bg-surface-bright dark:bg-inverse-surface rounded-lg border border-border-muted dark:border-outline p-2.5 cursor-pointer hover:border-secondary dark:hover:border-secondary-fixed transition-colors">
+                                <p className="text-[13px] text-on-surface dark:text-inverse-on-surface line-clamp-2 leading-snug">{note.content}</p>
+                              </li>
+                            ))}
+                          </ul>
+                          <button
+                            type="button"
+                            onClick={handleNuevaNota}
+                            className="w-full py-1.5 px-3 rounded-lg border border-dashed border-secondary dark:border-secondary-fixed text-secondary dark:text-secondary-fixed hover:bg-secondary/10 dark:hover:bg-secondary-fixed/10 font-semibold text-[12px] flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">add</span>
+                            <span>Agregar otra nota</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-4 px-2 text-center space-y-3">
+                          <div className="w-10 h-10 rounded-full bg-secondary/15 dark:bg-secondary-fixed/20 text-secondary dark:text-secondary-fixed flex items-center justify-center">
+                            <span className="material-symbols-outlined text-[22px]">edit_note</span>
+                          </div>
+                          <p className="text-on-surface-variant dark:text-outline-variant text-[13px]">
+                            No hay notas para este día.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={handleNuevaNota}
+                            className="w-full py-2 px-3 rounded-xl bg-secondary dark:bg-secondary-fixed text-primary font-bold text-[13px] hover:bg-secondary/90 dark:hover:bg-secondary-fixed-dim transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">note_add</span>
+                            <span>Agregar nueva nota</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-4 px-2 text-center space-y-3">
-                      <div className="w-10 h-10 rounded-full bg-secondary/15 dark:bg-secondary-fixed/20 text-secondary dark:text-secondary-fixed flex items-center justify-center">
-                        <span className="material-symbols-outlined text-[22px]">edit_note</span>
-                      </div>
-                      <p className="text-on-surface-variant dark:text-outline-variant text-[13px]">
-                        No hay notas para este día.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleNuevaNota}
-                        className="w-full py-2 px-3 rounded-xl bg-secondary dark:bg-secondary-fixed text-primary font-bold text-[13px] hover:bg-secondary/90 dark:hover:bg-secondary-fixed-dim transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">note_add</span>
-                        <span>Agregar nueva nota</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </section>
           )}
 
-          {/* Festivos del Mes (collapsible) */}
-          <section className={`bg-surface-container-lowest dark:bg-primary-container border-2 border-border-muted dark:border-outline rounded-xl shadow-sm overflow-hidden flex flex-col ${sidebarPanel === 'holidays' ? 'flex-1 min-h-0' : 'flex-shrink-0'}`}>
+          {/* Festivos del Mes (collapsible with animation) */}
+          <section className={`bg-surface-container-lowest dark:bg-primary-container border-2 border-border-muted dark:border-outline rounded-xl shadow-sm overflow-hidden flex flex-col transition-all duration-300 ${sidebarPanel === 'holidays' ? 'flex-1 min-h-0' : 'flex-shrink-0'}`}>
             <button 
               onClick={() => setSidebarPanel(sidebarPanel === 'holidays' ? '' : 'holidays')}
-              className="w-full flex-shrink-0 flex items-center justify-between p-3.5 hover:bg-surface-bright/50 dark:hover:bg-inverse-surface/10 transition-colors"
+              className="w-full flex-shrink-0 flex items-center justify-between p-3.5 hover:bg-surface-bright/50 dark:hover:bg-inverse-surface/10 transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-accent-red" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3"></path></svg>
                 <h3 className="text-[16px] md:text-[18px] font-semibold text-on-surface dark:text-inverse-on-surface">Festivos del Mes</h3>
               </div>
-              <svg className={`w-5 h-5 text-on-surface-variant transition-transform duration-200 ${sidebarPanel === 'holidays' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
+              <svg className={`w-5 h-5 text-on-surface-variant transition-transform duration-300 ${sidebarPanel === 'holidays' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
             </button>
             
-            {sidebarPanel === 'holidays' && (
-              <div className="px-3.5 pb-3.5 flex-1 min-h-0 flex flex-col overflow-hidden">
-                {monthHolidays.length > 0 ? (
-                  <ul className="space-y-2 max-h-[220px] md:max-h-[260px] flex-1 min-h-0 overflow-y-auto pr-1">
-                    {monthHolidays.map((h, i) => (
-                      <li key={i} 
-                          onClick={() => setSelectedHoliday(h)}
-                          className="flex items-center gap-3 p-2 bg-secondary-container dark:bg-on-secondary-fixed-variant rounded-lg border border-secondary dark:border-secondary-fixed cursor-pointer hover:opacity-90 hover:scale-[1.02] transition-all">
-                        <div className="flex-shrink-0 flex flex-col items-center justify-center w-10 h-10 bg-surface-bright dark:bg-inverse-surface rounded-md shadow-sm border border-secondary dark:border-secondary-fixed">
-                          <span className="text-[9px] font-bold text-accent-red uppercase leading-none">{monthNames[month].substring(0, 3)}</span>
-                          <span className="text-[16px] font-bold text-on-surface dark:text-inverse-on-surface leading-none mt-0.5">{h.date.getDate()}</span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="text-[13px] font-semibold text-on-secondary-container dark:text-secondary-fixed leading-tight truncate" title={h.name}>{h.name}</h4>
-                          <span className="text-[10px] text-on-secondary-container/75 dark:text-secondary-fixed/75">Clic para ver historia</span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-on-surface-variant dark:text-outline-variant text-[13px]">No hay festivos en este mes.</p>
-                )}
-                <Link to="/holidays" className="flex-shrink-0 block text-center w-full mt-2.5 py-1.5 text-[12px] font-semibold text-accent-red hover:underline transition-colors border-t border-border-muted dark:border-outline pt-2">
-                  Ver todos los festivos
-                </Link>
-              </div>
-            )}
+            <AnimatePresence initial={false}>
+              {sidebarPanel === 'holidays' && (
+                <motion.div
+                  key="holidays-content"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.28, ease: [0.04, 0.62, 0.23, 0.98] }}
+                  className="overflow-hidden flex-1 min-h-0 flex flex-col"
+                >
+                  <div className="px-3.5 pb-3.5 flex-1 min-h-0 flex flex-col overflow-hidden">
+                    {monthHolidays.length > 0 ? (
+                      <ul className="space-y-2 max-h-[220px] md:max-h-[260px] flex-1 min-h-0 overflow-y-auto pr-1">
+                        {monthHolidays.map((h, i) => (
+                          <li key={i} 
+                              onClick={() => setSelectedHoliday(h)}
+                              className="flex items-center gap-3 p-2 bg-secondary-container dark:bg-on-secondary-fixed-variant rounded-lg border border-secondary dark:border-secondary-fixed cursor-pointer hover:opacity-90 hover:scale-[1.02] transition-all">
+                            <div className="flex-shrink-0 flex flex-col items-center justify-center w-10 h-10 bg-surface-bright dark:bg-inverse-surface rounded-md shadow-sm border border-secondary dark:border-secondary-fixed">
+                              <span className="text-[9px] font-bold text-accent-red uppercase leading-none">{monthNames[month].substring(0, 3)}</span>
+                              <span className="text-[16px] font-bold text-on-surface dark:text-inverse-on-surface leading-none mt-0.5">{h.date.getDate()}</span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h4 className="text-[13px] font-semibold text-on-secondary-container dark:text-secondary-fixed leading-tight truncate" title={h.name}>{h.name}</h4>
+                              <span className="text-[10px] text-on-secondary-container/75 dark:text-secondary-fixed/75">Clic para ver historia</span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-on-surface-variant dark:text-outline-variant text-[13px]">No hay festivos en este mes.</p>
+                    )}
+                    <Link to="/holidays" className="flex-shrink-0 block text-center w-full mt-2.5 py-1.5 text-[12px] font-semibold text-accent-red hover:underline transition-colors border-t border-border-muted dark:border-outline pt-2">
+                      Ver todos los festivos
+                    </Link>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </section>
         </aside>
       </main>

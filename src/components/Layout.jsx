@@ -62,7 +62,7 @@ export default function Layout() {
   };
 
   return (
-    <div className={`bg-surface dark:bg-primary font-body-md text-[14px] text-on-surface dark:text-on-primary selection:bg-secondary selection:text-primary w-full flex flex-col relative ${isCalendar ? 'h-screen overflow-hidden' : 'min-h-screen pb-32'}`}>
+    <div className={`bg-surface dark:bg-primary font-body-md text-[14px] text-on-surface dark:text-on-primary selection:bg-secondary selection:text-primary w-full flex flex-col relative min-h-screen pb-20 lg:pb-0 ${isCalendar ? 'lg:h-screen lg:overflow-hidden' : 'pb-24'}`}>
       
       {/* Year Selection Modal */}
       <YearSelectModal />
@@ -76,7 +76,7 @@ export default function Layout() {
       {/* Top Navigation */}
       <header className="bg-surface-container-lowest dark:bg-primary px-4 md:px-8 py-3 w-full sticky top-0 z-50 border-b-4 border-primary dark:border-secondary-fixed-dim shadow-sm flex items-center justify-between gap-4">
         
-        {/* Left Side: Brand Logo, Name & Year Selector */}
+        {/* Left Side: Brand Logo & Name */}
         <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
           <button
             onClick={handleLogoClick}
@@ -93,33 +93,6 @@ export default function Layout() {
               Colomdario
             </span>
           </button>
-
-          {/* Year Selector Chip Button (only in calendar view) */}
-          {isCalendar && (
-            <button
-              type="button"
-              onClick={() => setIsYearModalOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-secondary/15 dark:bg-secondary-fixed/20 hover:bg-secondary/25 text-secondary dark:text-secondary-fixed font-bold text-[14px] md:text-[15px] border border-secondary/30 transition-all hover:scale-105 shadow-xs cursor-pointer overflow-hidden"
-              title="Cambiar año"
-            >
-              <motion.span
-                key={selectedYear}
-                initial={{ scale: 0.8 }}
-                animate={{
-                  scale: [1, 1.35, 0.9, 1.15, 1],
-                }}
-                transition={{
-                  duration: 0.6,
-                  times: [0, 0.25, 0.5, 0.75, 1],
-                  ease: "easeInOut"
-                }}
-                className="inline-block"
-              >
-                {selectedYear}
-              </motion.span>
-              <span className="material-symbols-outlined text-[18px]">expand_more</span>
-            </button>
-          )}
         </div>
 
         {/* Right Side: Calendar Controls (only in calendar view) & Profile */}
@@ -127,58 +100,6 @@ export default function Layout() {
           
           {isCalendar && (
             <>
-              {/* Active Month Switcher Controls with Fixed Stable Width */}
-              <div className="flex items-center bg-surface-bright dark:bg-inverse-surface border-2 border-border-muted dark:border-outline hover:border-secondary-fixed rounded-xl p-0.5 md:p-1 shadow-sm transition-colors">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (activeMonth === 0) {
-                      const newYear = selectedYear - 1;
-                      setSelectedYear(newYear);
-                      setActiveMonth(11);
-                      navigate(`/calendar?year=${newYear}&month=12`);
-                    } else {
-                      const prevMonth = activeMonth - 1;
-                      setActiveMonth(prevMonth);
-                      navigate(`/calendar?month=${String(prevMonth + 1).padStart(2, '0')}`);
-                    }
-                  }}
-                  aria-label="Mes anterior"
-                  className="p-1 md:p-1.5 rounded-lg hover:bg-secondary/15 text-secondary dark:text-secondary-fixed transition-colors flex items-center justify-center cursor-pointer"
-                  title="Mes anterior"
-                >
-                  <span className="material-symbols-outlined text-[20px] md:text-[22px]">chevron_left</span>
-                </button>
-
-                <Link
-                  to="/select-month"
-                  className="w-28 sm:w-32 md:w-36 text-center py-0.5 md:py-1 text-secondary dark:text-secondary-fixed font-bold text-[15px] md:text-[17px] tracking-tight hover:opacity-80 transition-opacity truncate inline-block"
-                  title="Ver todos los meses"
-                >
-                  {monthNames[activeMonth]}
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (activeMonth === 11) {
-                      const newYear = selectedYear + 1;
-                      setSelectedYear(newYear);
-                      setActiveMonth(0);
-                      navigate(`/calendar?year=${newYear}&month=01`);
-                    } else {
-                      const nextMonth = activeMonth + 1;
-                      setActiveMonth(nextMonth);
-                      navigate(`/calendar?month=${String(nextMonth + 1).padStart(2, '0')}`);
-                    }
-                  }}
-                  aria-label="Mes siguiente"
-                  className="p-1 md:p-1.5 rounded-lg hover:bg-secondary/15 text-secondary dark:text-secondary-fixed transition-colors flex items-center justify-center cursor-pointer"
-                  title="Mes siguiente"
-                >
-                  <span className="material-symbols-outlined text-[20px] md:text-[22px]">chevron_right</span>
-                </button>
-              </div>
 
               {/* Multiple Selection Toggle Button */}
               <button
